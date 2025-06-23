@@ -26,207 +26,201 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
-function Link(a, b) {
-    this.nodeA = a;
-    this.nodeB = b;
-    this.text = '';
-    this.lineAngleAdjust = 0; // value to add to textAngle when link is straight line
+class Link {
+    constructor(a, b) {
+        this.nodeA = a;
+        this.nodeB = b;
+        this.text = '';
+        this.lineAngleAdjust = 0; // value to add to textAngle when link is straight line
 
-    // make anchor point relative to the locations of nodeA and nodeB
-    this.parallelPart = 0.5; // percentage from nodeA to nodeB
-    this.perpendicularPart = 0; // pixels from line between nodeA and nodeB
-}
-
-Link.prototype.getAnchorPoint = function() {
-    var dx = this.nodeB.x - this.nodeA.x;
-    var dy = this.nodeB.y - this.nodeA.y;
-    var scale = Math.sqrt(dx * dx + dy * dy);
-    return {
-        'x': this.nodeA.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
-        'y': this.nodeA.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
-    };
-};
-
-Link.prototype.setAnchorPoint = function(x, y) {
-    var dx = this.nodeB.x - this.nodeA.x;
-    var dy = this.nodeB.y - this.nodeA.y;
-    var scale = Math.sqrt(dx * dx + dy * dy);
-    this.parallelPart = (dx * (x - this.nodeA.x) + dy * (y - this.nodeA.y)) / (scale * scale);
-    this.perpendicularPart = (dx * (y - this.nodeA.y) - dy * (x - this.nodeA.x)) / scale;
-    // snap to a straight line
-    if (this.parallelPart > 0 && this.parallelPart < 1 && Math.abs(this.perpendicularPart) < snapToPadding) {
-        this.lineAngleAdjust = (this.perpendicularPart < 0) * Math.PI;
-        this.perpendicularPart = 0;
+        // make anchor point relative to the locations of nodeA and nodeB
+        this.parallelPart = 0.5; // percentage from nodeA to nodeB
+        this.perpendicularPart = 0; // pixels from line between nodeA and nodeB
     }
-};
-
-Link.prototype.getEndPointsAndCircle = function() {
-    if (this.perpendicularPart == 0) {
-        var midX = (this.nodeA.x + this.nodeB.x) / 2;
-        var midY = (this.nodeA.y + this.nodeB.y) / 2;
-        var start = this.nodeA.closestPointOnCircle(midX, midY);
-        var end = this.nodeB.closestPointOnCircle(midX, midY);
+    getAnchorPoint() {
+        var dx = this.nodeB.x - this.nodeA.x;
+        var dy = this.nodeB.y - this.nodeA.y;
+        var scale = Math.sqrt(dx * dx + dy * dy);
         return {
-            'hasCircle': false,
-            'startX': start.x,
-            'startY': start.y,
-            'endX': end.x,
-            'endY': end.y,
+            'x': this.nodeA.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
+            'y': this.nodeA.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
         };
     }
-    var anchor = this.getAnchorPoint();
-    var circle = circleFromThreePoints(this.nodeA.x, this.nodeA.y, this.nodeB.x, this.nodeB.y, anchor.x, anchor.y);
-    var isReversed = (this.perpendicularPart > 0);
-    var reverseScale = isReversed ? 1 : -1;
-    var startAngle = Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) - reverseScale * nodeRadius / circle.radius;
-    var endAngle = Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) + reverseScale * nodeRadius / circle.radius;
-    var startX = circle.x + circle.radius * Math.cos(startAngle);
-    var startY = circle.y + circle.radius * Math.sin(startAngle);
-    var endX = circle.x + circle.radius * Math.cos(endAngle);
-    var endY = circle.y + circle.radius * Math.sin(endAngle);
-    return {
-        'hasCircle': true,
-        'startX': startX,
-        'startY': startY,
-        'endX': endX,
-        'endY': endY,
-        'startAngle': startAngle,
-        'endAngle': endAngle,
-        'circleX': circle.x,
-        'circleY': circle.y,
-        'circleRadius': circle.radius,
-        'reverseScale': reverseScale,
-        'isReversed': isReversed,
-    };
-};
-
-Link.prototype.draw = function(c) {
-    var stuff = this.getEndPointsAndCircle();
-    // draw arc
-    c.beginPath();
-    if (stuff.hasCircle) {
-        c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, stuff.isReversed);
-    } else {
-        c.moveTo(stuff.startX, stuff.startY);
-        c.lineTo(stuff.endX, stuff.endY);
-    }
-    c.stroke();
-    // draw the head of the arrow
-    if (stuff.hasCircle) {
-        drawArrow(c, stuff.endX, stuff.endY, stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
-    } else {
-        drawArrow(c, stuff.endX, stuff.endY, Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX));
-    }
-    // draw the text
-    if (stuff.hasCircle) {
-        var startAngle = stuff.startAngle;
-        var endAngle = stuff.endAngle;
-        if (endAngle < startAngle) {
-            endAngle += Math.PI * 2;
+    setAnchorPoint(x, y) {
+        var dx = this.nodeB.x - this.nodeA.x;
+        var dy = this.nodeB.y - this.nodeA.y;
+        var scale = Math.sqrt(dx * dx + dy * dy);
+        this.parallelPart = (dx * (x - this.nodeA.x) + dy * (y - this.nodeA.y)) / (scale * scale);
+        this.perpendicularPart = (dx * (y - this.nodeA.y) - dy * (x - this.nodeA.x)) / scale;
+        // snap to a straight line
+        if (this.parallelPart > 0 && this.parallelPart < 1 && Math.abs(this.perpendicularPart) < snapToPadding) {
+            this.lineAngleAdjust = (this.perpendicularPart < 0) * Math.PI;
+            this.perpendicularPart = 0;
         }
-        var textAngle = (startAngle + endAngle) / 2 + stuff.isReversed * Math.PI;
-        var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
-        var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
-        drawText(c, this.text, textX, textY, textAngle, selectedObject == this);
-    } else {
-        var textX = (stuff.startX + stuff.endX) / 2;
-        var textY = (stuff.startY + stuff.endY) / 2;
-        var textAngle = Math.atan2(stuff.endX - stuff.startX, stuff.startY - stuff.endY);
-        drawText(c, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObject == this);
     }
-};
-
-Link.prototype.containsPoint = function(x, y) {
-    var stuff = this.getEndPointsAndCircle();
-    if (stuff.hasCircle) {
-        var dx = x - stuff.circleX;
-        var dy = y - stuff.circleY;
-        var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
-        if (Math.abs(distance) < hitTargetPadding) {
-            var angle = Math.atan2(dy, dx);
+    getEndPointsAndCircle() {
+        if (this.perpendicularPart == 0) {
+            var midX = (this.nodeA.x + this.nodeB.x) / 2;
+            var midY = (this.nodeA.y + this.nodeB.y) / 2;
+            var start = this.nodeA.closestPointOnCircle(midX, midY);
+            var end = this.nodeB.closestPointOnCircle(midX, midY);
+            return {
+                'hasCircle': false,
+                'startX': start.x,
+                'startY': start.y,
+                'endX': end.x,
+                'endY': end.y,
+            };
+        }
+        var anchor = this.getAnchorPoint();
+        var circle = circleFromThreePoints(this.nodeA.x, this.nodeA.y, this.nodeB.x, this.nodeB.y, anchor.x, anchor.y);
+        var isReversed = (this.perpendicularPart > 0);
+        var reverseScale = isReversed ? 1 : -1;
+        var startAngle = Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) - reverseScale * nodeRadius / circle.radius;
+        var endAngle = Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) + reverseScale * nodeRadius / circle.radius;
+        var startX = circle.x + circle.radius * Math.cos(startAngle);
+        var startY = circle.y + circle.radius * Math.sin(startAngle);
+        var endX = circle.x + circle.radius * Math.cos(endAngle);
+        var endY = circle.y + circle.radius * Math.sin(endAngle);
+        return {
+            'hasCircle': true,
+            'startX': startX,
+            'startY': startY,
+            'endX': endX,
+            'endY': endY,
+            'startAngle': startAngle,
+            'endAngle': endAngle,
+            'circleX': circle.x,
+            'circleY': circle.y,
+            'circleRadius': circle.radius,
+            'reverseScale': reverseScale,
+            'isReversed': isReversed,
+        };
+    }
+    draw(c) {
+        var stuff = this.getEndPointsAndCircle();
+        // draw arc
+        c.beginPath();
+        if (stuff.hasCircle) {
+            c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, stuff.isReversed);
+        } else {
+            c.moveTo(stuff.startX, stuff.startY);
+            c.lineTo(stuff.endX, stuff.endY);
+        }
+        c.stroke();
+        // draw the head of the arrow
+        if (stuff.hasCircle) {
+            drawArrow(c, stuff.endX, stuff.endY, stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
+        } else {
+            drawArrow(c, stuff.endX, stuff.endY, Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX));
+        }
+        // draw the text
+        if (stuff.hasCircle) {
             var startAngle = stuff.startAngle;
             var endAngle = stuff.endAngle;
-            if (stuff.isReversed) {
-                var temp = startAngle;
-                startAngle = endAngle;
-                endAngle = temp;
-            }
             if (endAngle < startAngle) {
                 endAngle += Math.PI * 2;
             }
-            if (angle < startAngle) {
-                angle += Math.PI * 2;
-            } else if (angle > endAngle) {
-                angle -= Math.PI * 2;
-            }
-            return (angle > startAngle && angle < endAngle);
+            var textAngle = (startAngle + endAngle) / 2 + stuff.isReversed * Math.PI;
+            var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
+            var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
+            drawText(c, this.text, textX, textY, textAngle, selectedObject == this);
+        } else {
+            var textX = (stuff.startX + stuff.endX) / 2;
+            var textY = (stuff.startY + stuff.endY) / 2;
+            var textAngle = Math.atan2(stuff.endX - stuff.startX, stuff.startY - stuff.endY);
+            drawText(c, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObject == this);
         }
-    } else {
-        var dx = stuff.endX - stuff.startX;
-        var dy = stuff.endY - stuff.startY;
-        var length = Math.sqrt(dx * dx + dy * dy);
-        var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
-        var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
-        return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
     }
-    return false;
-};
-
-function Node(x, y) {
-    this.x = x;
-    this.y = y;
-    this.mouseOffsetX = 0;
-    this.mouseOffsetY = 0;
-    this.isAcceptState = false;
-    this.text = '';
-    this.textOnly = false;
+    containsPoint(x, y) {
+        var stuff = this.getEndPointsAndCircle();
+        if (stuff.hasCircle) {
+            var dx = x - stuff.circleX;
+            var dy = y - stuff.circleY;
+            var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+            if (Math.abs(distance) < hitTargetPadding) {
+                var angle = Math.atan2(dy, dx);
+                var startAngle = stuff.startAngle;
+                var endAngle = stuff.endAngle;
+                if (stuff.isReversed) {
+                    var temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                if (angle < startAngle) {
+                    angle += Math.PI * 2;
+                } else if (angle > endAngle) {
+                    angle -= Math.PI * 2;
+                }
+                return (angle > startAngle && angle < endAngle);
+            }
+        } else {
+            var dx = stuff.endX - stuff.startX;
+            var dy = stuff.endY - stuff.startY;
+            var length = Math.sqrt(dx * dx + dy * dy);
+            var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
+            var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+            return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
+        }
+        return false;
+    }
 }
 
-Node.prototype.setMouseStart = function(x, y) {
-    this.mouseOffsetX = this.x - x;
-    this.mouseOffsetY = this.y - y;
-};
-
-Node.prototype.setAnchorPoint = function(x, y) {
-    this.x = x + this.mouseOffsetX;
-    this.y = y + this.mouseOffsetY;
-};
-
-Node.prototype.draw = function(c) {
-    if (this.textOnly) {
-        drawText(c, this.text, this.x, this.y, null, selectedObject == this);
-        return;
+class Node {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.mouseOffsetX = 0;
+        this.mouseOffsetY = 0;
+        this.isAcceptState = false;
+        this.text = '';
+        this.textOnly = false;
     }
+    setMouseStart(x, y) {
+        this.mouseOffsetX = this.x - x;
+        this.mouseOffsetY = this.y - y;
+    }
+    setAnchorPoint(x, y) {
+        this.x = x + this.mouseOffsetX;
+        this.y = y + this.mouseOffsetY;
+    }
+    draw(c) {
+        if (this.textOnly) {
+            drawText(c, this.text, this.x, this.y, null, selectedObject == this);
+            return;
+        }
 
-    // draw the circle
-    c.beginPath();
-    c.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
-    c.stroke();
-
-    // draw the text
-    drawText(c, this.text, this.x, this.y, null, selectedObject == this);
-
-    // draw a double circle for an accept state
-    if (this.isAcceptState) {
+        // draw the circle
         c.beginPath();
-        c.arc(this.x, this.y, nodeRadius - 6, 0, 2 * Math.PI, false);
+        c.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
         c.stroke();
+
+        // draw the text
+        drawText(c, this.text, this.x, this.y, null, selectedObject == this);
+
+        // draw a double circle for an accept state
+        if (this.isAcceptState) {
+            c.beginPath();
+            c.arc(this.x, this.y, nodeRadius - 6, 0, 2 * Math.PI, false);
+            c.stroke();
+        }
     }
-};
-
-Node.prototype.closestPointOnCircle = function(x, y) {
-    var dx = x - this.x;
-    var dy = y - this.y;
-    var scale = Math.sqrt(dx * dx + dy * dy);
-    return {
-        'x': this.x + dx * nodeRadius / scale,
-        'y': this.y + dy * nodeRadius / scale,
-    };
-};
-
-Node.prototype.containsPoint = function(x, y) {
-    return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
-};
+    closestPointOnCircle(x, y) {
+        var dx = x - this.x;
+        var dy = y - this.y;
+        var scale = Math.sqrt(dx * dx + dy * dy);
+        return {
+            'x': this.x + dx * nodeRadius / scale,
+            'y': this.y + dy * nodeRadius / scale,
+        };
+    }
+    containsPoint(x, y) {
+        return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
+    }
+}
 
 class SelfLink {
     constructor(node, mouse) {
@@ -461,7 +455,7 @@ class ExportAsLaTeX {
         };
         this.measureText = function(text) {
             var c = canvas.getContext('2d');
-            c.font = '20px "Times New Romain", serif';
+            c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
         this.advancedFillText = function(text, originalText, x, y, angleOrNull) {
@@ -586,7 +580,7 @@ class ExportAsSVG {
         };
         this.measureText = function(text) {
             var c = canvas.getContext('2d');
-            c.font = '20px "Times New Romain", serif';
+            c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
         this.fillText = function(text, x, y) {
@@ -595,7 +589,7 @@ class ExportAsSVG {
             x += this._transX;
             y += this._transY;
             if (text.replace(' ', '').length > 0) {
-                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Segoe UI" font-size="20">' + textToXML(text) + '</text>\n';
             }
         };
         this.translate = function(x, y) {
@@ -667,7 +661,7 @@ function canvasHasFocus() {
 
 function drawText(c, originalText, x, y, angleOrNull, isSelected) {
     text = convertLatexShortcuts(originalText);
-    c.font = '20px "Times New Roman", serif';
+    c.font = '20px "Segoe UI"';
     var width = c.measureText(text).width;
 
     // center the text
@@ -1032,8 +1026,10 @@ function saveAsPNG() {
     tmp.width = croppedWidth;
     tmp.height = croppedHeight;
     tmp.getContext('2d').putImageData(croppedData, 0, 0);
-    var pngData = tmp.toDataURL('image/png');
-    document.location.href = pngData;
+    var pngData = canvas.toDataURL('image/png');
+	var pngLink = document.getElementById("pngLink");
+	pngLink.download = "image.png";
+	pngLink.href = pngData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 // Returns a bounding rectangle that contains all non-empty pixels. Returns an
