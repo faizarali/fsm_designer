@@ -37,6 +37,7 @@ class Link {
         this.parallelPart = 0.5; // percentage from nodeA to nodeB
         this.perpendicularPart = 0; // pixels from line between nodeA and nodeB
     }
+
     getAnchorPoint() {
         var dx = this.nodeB.x - this.nodeA.x;
         var dy = this.nodeB.y - this.nodeA.y;
@@ -46,6 +47,7 @@ class Link {
             'y': this.nodeA.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
         };
     }
+
     setAnchorPoint(x, y) {
         var dx = this.nodeB.x - this.nodeA.x;
         var dy = this.nodeB.y - this.nodeA.y;
@@ -58,6 +60,7 @@ class Link {
             this.perpendicularPart = 0;
         }
     }
+
     getEndPointsAndCircle() {
         if (this.perpendicularPart == 0) {
             var midX = (this.nodeA.x + this.nodeB.x) / 2;
@@ -97,6 +100,7 @@ class Link {
             'isReversed': isReversed,
         };
     }
+
     draw(c) {
         var stuff = this.getEndPointsAndCircle();
         // draw arc
@@ -132,6 +136,7 @@ class Link {
             drawText(c, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObject == this);
         }
     }
+
     containsPoint(x, y) {
         var stuff = this.getEndPointsAndCircle();
         if (stuff.hasCircle) {
@@ -179,14 +184,17 @@ class Node {
         this.text = '';
         this.textOnly = false;
     }
+
     setMouseStart(x, y) {
         this.mouseOffsetX = this.x - x;
         this.mouseOffsetY = this.y - y;
     }
+
     setAnchorPoint(x, y) {
         this.x = x + this.mouseOffsetX;
         this.y = y + this.mouseOffsetY;
     }
+
     draw(c) {
         if (this.textOnly) {
             drawText(c, this.text, this.x, this.y, null, selectedObject == this);
@@ -208,6 +216,7 @@ class Node {
             c.stroke();
         }
     }
+
     closestPointOnCircle(x, y) {
         var dx = x - this.x;
         var dy = y - this.y;
@@ -217,6 +226,7 @@ class Node {
             'y': this.y + dy * nodeRadius / scale,
         };
     }
+
     containsPoint(x, y) {
         return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
     }
@@ -233,9 +243,11 @@ class SelfLink {
             this.setAnchorPoint(mouse.x, mouse.y);
         }
     }
+
     setMouseStart(x, y) {
         this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.node.y, x - this.node.x);
     }
+
     setAnchorPoint(x, y) {
         this.anchorAngle = Math.atan2(y - this.node.y, x - this.node.x) + this.mouseOffsetAngle;
         // snap to 90 degrees
@@ -245,6 +257,7 @@ class SelfLink {
         if (this.anchorAngle < -Math.PI) this.anchorAngle += 2 * Math.PI;
         if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
     }
+
     getEndPointsAndCircle() {
         var circleX = this.node.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
         var circleY = this.node.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
@@ -268,6 +281,7 @@ class SelfLink {
             'circleRadius': circleRadius
         };
     }
+
     draw(c) {
         var stuff = this.getEndPointsAndCircle();
         // draw arc
@@ -281,6 +295,7 @@ class SelfLink {
         // draw the head of the arrow
         drawArrow(c, stuff.endX, stuff.endY, stuff.endAngle + Math.PI * 0.4);
     }
+
     containsPoint(x, y) {
         var stuff = this.getEndPointsAndCircle();
         var dx = x - stuff.circleX;
@@ -301,6 +316,7 @@ class StartLink {
             this.setAnchorPoint(start.x, start.y);
         }
     }
+
     setAnchorPoint(x, y) {
         this.deltaX = x - this.node.x;
         this.deltaY = y - this.node.y;
@@ -313,6 +329,7 @@ class StartLink {
             this.deltaY = 0;
         }
     }
+
     getEndPoints() {
         var startX = this.node.x + this.deltaX;
         var startY = this.node.y + this.deltaY;
@@ -324,6 +341,7 @@ class StartLink {
             'endY': end.y,
         };
     }
+
     draw(c) {
         var stuff = this.getEndPoints();
 
@@ -340,6 +358,7 @@ class StartLink {
         // draw the head of the arrow
         drawArrow(c, stuff.endX, stuff.endY, Math.atan2(-this.deltaY, -this.deltaX));
     }
+
     containsPoint(x, y) {
         var stuff = this.getEndPoints();
         var dx = stuff.endX - stuff.startX;
@@ -356,6 +375,7 @@ class TemporaryLink {
         this.from = from;
         this.to = to;
     }
+
     draw(c) {
         // draw the line
         c.beginPath();
@@ -395,6 +415,7 @@ class ExportAsLaTeX {
         this.beginPath = function() {
             this._points = [];
         };
+
         this.arc = function(x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -425,6 +446,7 @@ class ExportAsLaTeX {
                 this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
             }
         };
+
         this.moveTo = this.lineTo = function(x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -435,6 +457,7 @@ class ExportAsLaTeX {
                 'y': y
             });
         };
+
         this.stroke = function() {
             if (this._points.length == 0) return;
             this._texData += '\\draw [' + this.strokeStyle + ']';
@@ -444,6 +467,7 @@ class ExportAsLaTeX {
             }
             this._texData += ';\n';
         };
+
         this.fill = function() {
             if (this._points.length == 0) return;
             this._texData += '\\fill [' + this.strokeStyle + ']';
@@ -453,11 +477,13 @@ class ExportAsLaTeX {
             }
             this._texData += ';\n';
         };
+
         this.measureText = function(text) {
             var c = canvas.getContext('2d');
             c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
+
         this.advancedFillText = function(text, originalText, x, y, angleOrNull) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -515,6 +541,7 @@ class ExportAsSVG {
         this.beginPath = function() {
             this._points = [];
         };
+
         this.arc = function(x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -552,6 +579,7 @@ class ExportAsSVG {
                 this._svgData += '"/>\n';
             }
         };
+
         this.moveTo = this.lineTo = function(x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -562,6 +590,7 @@ class ExportAsSVG {
                 'y': y
             });
         };
+
         this.stroke = function() {
             if (this._points.length == 0) return;
             this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
@@ -570,6 +599,7 @@ class ExportAsSVG {
             }
             this._svgData += '"/>\n';
         };
+
         this.fill = function() {
             if (this._points.length == 0) return;
             this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
@@ -578,11 +608,13 @@ class ExportAsSVG {
             }
             this._svgData += '"/>\n';
         };
+
         this.measureText = function(text) {
             var c = canvas.getContext('2d');
             c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
+
         this.fillText = function(text, x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
@@ -592,6 +624,7 @@ class ExportAsSVG {
                 this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Segoe UI" font-size="20">' + textToXML(text) + '</text>\n';
             }
         };
+
         this.translate = function(x, y) {
             this._transX = x;
             this._transY = y;
@@ -601,31 +634,40 @@ class ExportAsSVG {
     }
 }
 
-var greekLetterNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega', 'emptyset', 'rightarrow', 'leftarrow'];
+const greekLetterNames = [
+    'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
+    'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi',
+    'Omega', 'emptyset', 'rightarrow', 'leftarrow'
+];
+
+const specialSymbols = {
+    emptyset: String.fromCharCode(8709), // ∅
+    rightarrow: String.fromCharCode(8594), // →
+    leftarrow: String.fromCharCode(8592) // ←
+};
 
 function convertLatexShortcuts(text) {
-    // html greek characters
-    for (var i = 0; i < greekLetterNames.length; i++) {
-        var name = greekLetterNames[i];
-        if (name == "emptyset") {
-            text = text.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(8709));
-            continue;
-        }
-        if (name == "rightarrow") {
-            text = text.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(8594));
-            continue;
-        }
-        if (name == "leftarrow") {
-            text = text.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(8592));
-            continue;
-        }
-        text = text.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16)));
-        text = text.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16)));
-    }
+    greekLetterNames.forEach((name, index) => {
+        if (specialSymbols[name]) {
+            const regex = new RegExp(`\\\\${name}`, 'g');
+            text = text.replace(regex, specialSymbols[name]);
+        } else {
+            // Handle uppercase Greek letters
+            const upperCharCode = 913 + index + (index > 16 ? 1 : 0); // Unicode skips one character after Rho
+            const upperRegex = new RegExp(`\\\\${name}`, 'g');
+            text = text.replace(upperRegex, String.fromCharCode(upperCharCode));
 
-    // subscripts
-    for (var i = 0; i < 10; i++) {
-        text = text.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+            // Handle lowercase Greek letters
+            const lowerCharCode = 945 + index + (index > 16 ? 1 : 0);
+            const lowerRegex = new RegExp(`\\\\${name.toLowerCase()}`, 'g');
+            text = text.replace(lowerRegex, String.fromCharCode(lowerCharCode));
+        }
+    });
+
+    // Replace _0 through _9 with subscript digits
+    for (let i = 0; i <= 9; i++) {
+        const subscriptRegex = new RegExp(`_${i}`, 'g');
+        text = text.replace(subscriptRegex, String.fromCharCode(8320 + i));
     }
 
     return text;
@@ -751,11 +793,13 @@ function drawUsing(c) {
         c.fillStyle = c.strokeStyle = (nodes[i] == selectedObject) ? 'blue' : 'black';
         nodes[i].draw(c);
     }
+
     for (var i = 0; i < links.length; i++) {
         c.lineWidth = 1;
         c.fillStyle = c.strokeStyle = (links[i] == selectedObject) ? 'blue' : 'black';
         links[i].draw(c);
     }
+
     if (currentLink != null) {
         c.lineWidth = 1;
         c.fillStyle = c.strokeStyle = 'black';
@@ -776,6 +820,7 @@ function selectObject(x, y) {
             return nodes[i];
         }
     }
+
     for (var i = 0; i < links.length; i++) {
         if (links[i].containsPoint(x, y)) {
             return links[i];
