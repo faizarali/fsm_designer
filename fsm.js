@@ -396,7 +396,7 @@ class ExportAsLaTeX {
         this._texData = '';
         this._scale = 0.1; // to convert pixels to document space (TikZ breaks if the numbers get too big, above 500?)
 
-        this.toLaTeX = function() {
+        this.toLaTeX = function () {
             return '\\documentclass[12pt]{article}\n' +
                 '\\usepackage{tikz}\n' +
                 '\n' +
@@ -412,11 +412,11 @@ class ExportAsLaTeX {
                 '\\end{document}\n';
         };
 
-        this.beginPath = function() {
+        this.beginPath = function () {
             this._points = [];
         };
 
-        this.arc = function(x, y, radius, startAngle, endAngle, isReversed) {
+        this.arc = function (x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x *= this._scale;
@@ -447,7 +447,7 @@ class ExportAsLaTeX {
             }
         };
 
-        this.moveTo = this.lineTo = function(x, y) {
+        this.moveTo = this.lineTo = function (x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x *= this._scale;
@@ -458,7 +458,7 @@ class ExportAsLaTeX {
             });
         };
 
-        this.stroke = function() {
+        this.stroke = function () {
             if (this._points.length == 0) return;
             this._texData += '\\draw [' + this.strokeStyle + ']';
             for (var i = 0; i < this._points.length; i++) {
@@ -468,7 +468,7 @@ class ExportAsLaTeX {
             this._texData += ';\n';
         };
 
-        this.fill = function() {
+        this.fill = function () {
             if (this._points.length == 0) return;
             this._texData += '\\fill [' + this.strokeStyle + ']';
             for (var i = 0; i < this._points.length; i++) {
@@ -478,13 +478,13 @@ class ExportAsLaTeX {
             this._texData += ';\n';
         };
 
-        this.measureText = function(text) {
+        this.measureText = function (text) {
             var c = canvas.getContext('2d');
             c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
 
-        this.advancedFillText = function(text, originalText, x, y, angleOrNull) {
+        this.advancedFillText = function (text, originalText, x, y, angleOrNull) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             if (text.replace(' ', '').length > 0) {
@@ -510,7 +510,7 @@ class ExportAsLaTeX {
             }
         };
 
-        this.translate = this.save = this.restore = this.clearRect = function() {};
+        this.translate = this.save = this.restore = this.clearRect = function () { };
     }
 }
 
@@ -529,7 +529,7 @@ class ExportAsSVG {
         this._transX = 0;
         this._transY = 0;
 
-        this.toSVG = function() {
+        this.toSVG = function () {
             var data = '<?xml version="1.0" standalone="no"?>\n';
             data += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n';
             data += '<svg width="' + this.width + '" height="' + this.height + '" version="1.1" xmlns="http://www.w3.org/2000/svg">\n';
@@ -538,11 +538,11 @@ class ExportAsSVG {
             return data;
         };
 
-        this.beginPath = function() {
+        this.beginPath = function () {
             this._points = [];
         };
 
-        this.arc = function(x, y, radius, startAngle, endAngle, isReversed) {
+        this.arc = function (x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x += this._transX;
@@ -580,7 +580,7 @@ class ExportAsSVG {
             }
         };
 
-        this.moveTo = this.lineTo = function(x, y) {
+        this.moveTo = this.lineTo = function (x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x += this._transX;
@@ -591,7 +591,7 @@ class ExportAsSVG {
             });
         };
 
-        this.stroke = function() {
+        this.stroke = function () {
             if (this._points.length == 0) return;
             this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (var i = 0; i < this._points.length; i++) {
@@ -600,7 +600,7 @@ class ExportAsSVG {
             this._svgData += '"/>\n';
         };
 
-        this.fill = function() {
+        this.fill = function () {
             if (this._points.length == 0) return;
             this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (var i = 0; i < this._points.length; i++) {
@@ -609,13 +609,13 @@ class ExportAsSVG {
             this._svgData += '"/>\n';
         };
 
-        this.measureText = function(text) {
+        this.measureText = function (text) {
             var c = canvas.getContext('2d');
             c.font = '20px "Segoe UI"';
             return c.measureText(text);
         };
 
-        this.fillText = function(text, x, y) {
+        this.fillText = function (text, x, y) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x += this._transX;
@@ -625,12 +625,12 @@ class ExportAsSVG {
             }
         };
 
-        this.translate = function(x, y) {
+        this.translate = function (x, y) {
             this._transX = x;
             this._transY = y;
         };
 
-        this.save = this.restore = this.clearRect = function() {};
+        this.save = this.restore = this.clearRect = function () { };
     }
 }
 
@@ -843,12 +843,12 @@ function snapNode(node) {
     }
 }
 
-window.onload = function() {
+window.onload = function () {
     canvas = document.getElementById('canvas');
     restoreBackup();
     draw();
 
-    canvas.onmousedown = function(e) {
+    canvas.onmousedown = function (e) {
         var mouse = crossBrowserRelativeMousePos(e);
         selectedObject = selectObject(mouse.x, mouse.y);
         movingObject = false;
@@ -881,7 +881,7 @@ window.onload = function() {
         }
     };
 
-    canvas.ondblclick = function(e) {
+    canvas.ondblclick = function (e) {
         var mouse = crossBrowserRelativeMousePos(e);
         selectedObject = selectObject(mouse.x, mouse.y);
 
@@ -896,7 +896,7 @@ window.onload = function() {
         }
     };
 
-    canvas.onmousemove = function(e) {
+    canvas.onmousemove = function (e) {
         var mouse = crossBrowserRelativeMousePos(e);
 
         if (currentLink != null) {
@@ -932,7 +932,7 @@ window.onload = function() {
         }
     };
 
-    canvas.onmouseup = function(e) {
+    canvas.onmouseup = function (e) {
         movingObject = false;
 
         if (currentLink != null) {
@@ -949,7 +949,7 @@ window.onload = function() {
 
 var shift = false;
 
-document.onkeydown = function(e) {
+document.onkeydown = function (e) {
     var key = crossBrowserKey(e);
 
     if (key == 16) {
@@ -984,7 +984,7 @@ document.onkeydown = function(e) {
     }
 };
 
-document.onkeyup = function(e) {
+document.onkeyup = function (e) {
     var key = crossBrowserKey(e);
 
     if (key == 16) {
@@ -992,7 +992,7 @@ document.onkeyup = function(e) {
     }
 };
 
-document.onkeypress = function(e) {
+document.onkeypress = function (e) {
     // don't read keystrokes when other things have focus
     var key = crossBrowserKey(e);
     if (!canvasHasFocus()) {
@@ -1083,7 +1083,7 @@ function getBoundingRect() {
     var context = canvas.getContext('2d');
     var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    var indexToLocation = function(i) {
+    var indexToLocation = function (i) {
         var pixelIndex = Math.floor(i / 4);
         var col = Math.floor(pixelIndex % canvas.width);
         var row = Math.floor(pixelIndex / canvas.width);
@@ -1178,7 +1178,7 @@ function jsonUploaded() {
     if (uploadElement.files.length < 1) return;
     var file = uploadElement.files[0];
     var reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         var content = e.target.result;
         try {
             var data = JSON.parse(content);
