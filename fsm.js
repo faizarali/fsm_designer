@@ -1124,7 +1124,7 @@ function saveAsLaTeX() {
 }
 
 function saveAsJSON() {
-    var jsonData = JSON.stringify(getBackupData());
+    var jsonData = JSON.stringify(getBackupData(), null, 2);
     downloadFile("automaton_backup.json", jsonData, "text/json");
 }
 
@@ -1279,5 +1279,5 @@ function saveBackup() {
     }
     var backup = getBackupData();
 
-    localStorage['fsm'] = JSON.stringify(backup);
+    localStorage['fsm'] = JSON.stringify(backup, null, 2);
 }
