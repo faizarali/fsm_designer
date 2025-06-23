@@ -1027,9 +1027,9 @@ function saveAsPNG() {
     tmp.height = croppedHeight;
     tmp.getContext('2d').putImageData(croppedData, 0, 0);
     var pngData = canvas.toDataURL('image/png');
-	var pngLink = document.getElementById("pngLink");
-	pngLink.download = "image.png";
-	pngLink.href = pngData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    var pngLink = document.getElementById("pngLink");
+    pngLink.download = "image.png";
+    pngLink.href = pngData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 // Returns a bounding rectangle that contains all non-empty pixels. Returns an
