@@ -31,10 +31,11 @@ class Link {
         this.nodeA = a;
         this.nodeB = b;
         this.text = '';
-        this.lineAngleAdjust = 0; // value to add to textAngle when link is straight line
+        this.lineAngleAdjust =
+            0; // value to add to textAngle when link is straight line
 
         // make anchor point relative to the locations of nodeA and nodeB
-        this.parallelPart = 0.5; // percentage from nodeA to nodeB
+        this.parallelPart = 0.5;    // percentage from nodeA to nodeB
         this.perpendicularPart = 0; // pixels from line between nodeA and nodeB
     }
 
@@ -43,8 +44,10 @@ class Link {
         var dy = this.nodeB.y - this.nodeA.y;
         var scale = Math.sqrt(dx * dx + dy * dy);
         return {
-            'x': this.nodeA.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
-            'y': this.nodeA.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
+            'x': this.nodeA.x + dx * this.parallelPart -
+                dy * this.perpendicularPart / scale,
+            'y': this.nodeA.y + dy * this.parallelPart +
+                dx * this.perpendicularPart / scale
         };
     }
 
@@ -52,10 +55,14 @@ class Link {
         var dx = this.nodeB.x - this.nodeA.x;
         var dy = this.nodeB.y - this.nodeA.y;
         var scale = Math.sqrt(dx * dx + dy * dy);
-        this.parallelPart = (dx * (x - this.nodeA.x) + dy * (y - this.nodeA.y)) / (scale * scale);
-        this.perpendicularPart = (dx * (y - this.nodeA.y) - dy * (x - this.nodeA.x)) / scale;
+        this.parallelPart =
+            (dx * (x - this.nodeA.x) + dy * (y - this.nodeA.y)) /
+            (scale * scale);
+        this.perpendicularPart =
+            (dx * (y - this.nodeA.y) - dy * (x - this.nodeA.x)) / scale;
         // snap to a straight line
-        if (this.parallelPart > 0 && this.parallelPart < 1 && Math.abs(this.perpendicularPart) < snapToPadding) {
+        if (this.parallelPart > 0 && this.parallelPart < 1 &&
+            Math.abs(this.perpendicularPart) < snapToPadding) {
             this.lineAngleAdjust = (this.perpendicularPart < 0) * Math.PI;
             this.perpendicularPart = 0;
         }
@@ -76,11 +83,17 @@ class Link {
             };
         }
         var anchor = this.getAnchorPoint();
-        var circle = circleFromThreePoints(this.nodeA.x, this.nodeA.y, this.nodeB.x, this.nodeB.y, anchor.x, anchor.y);
+        var circle =
+            circleFromThreePoints(this.nodeA.x, this.nodeA.y, this.nodeB.x,
+                this.nodeB.y, anchor.x, anchor.y);
         var isReversed = (this.perpendicularPart > 0);
         var reverseScale = isReversed ? 1 : -1;
-        var startAngle = Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) - reverseScale * nodeRadius / circle.radius;
-        var endAngle = Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) + reverseScale * nodeRadius / circle.radius;
+        var startAngle =
+            Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) -
+            reverseScale * nodeRadius / circle.radius;
+        var endAngle =
+            Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) +
+            reverseScale * nodeRadius / circle.radius;
         var startX = circle.x + circle.radius * Math.cos(startAngle);
         var startY = circle.y + circle.radius * Math.sin(startAngle);
         var endX = circle.x + circle.radius * Math.cos(endAngle);
@@ -106,7 +119,8 @@ class Link {
         // draw arc
         c.beginPath();
         if (stuff.hasCircle) {
-            c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, stuff.isReversed);
+            c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius,
+                stuff.startAngle, stuff.endAngle, stuff.isReversed);
         } else {
             c.moveTo(stuff.startX, stuff.startY);
             c.lineTo(stuff.endX, stuff.endY);
@@ -114,9 +128,12 @@ class Link {
         c.stroke();
         // draw the head of the arrow
         if (stuff.hasCircle) {
-            drawArrow(c, stuff.endX, stuff.endY, stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
+            drawArrow(c, stuff.endX, stuff.endY,
+                stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
         } else {
-            drawArrow(c, stuff.endX, stuff.endY, Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX));
+            drawArrow(c, stuff.endX, stuff.endY,
+                Math.atan2(stuff.endY - stuff.startY,
+                    stuff.endX - stuff.startX));
         }
         // draw the text
         if (stuff.hasCircle) {
@@ -125,15 +142,21 @@ class Link {
             if (endAngle < startAngle) {
                 endAngle += Math.PI * 2;
             }
-            var textAngle = (startAngle + endAngle) / 2 + stuff.isReversed * Math.PI;
-            var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
-            var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
-            drawText(c, this.text, textX, textY, textAngle, selectedObject == this);
+            var textAngle =
+                (startAngle + endAngle) / 2 + stuff.isReversed * Math.PI;
+            var textX =
+                stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
+            var textY =
+                stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
+            drawText(c, this.text, textX, textY, textAngle,
+                selectedObject == this);
         } else {
             var textX = (stuff.startX + stuff.endX) / 2;
             var textY = (stuff.startY + stuff.endY) / 2;
-            var textAngle = Math.atan2(stuff.endX - stuff.startX, stuff.startY - stuff.endY);
-            drawText(c, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObject == this);
+            var textAngle = Math.atan2(stuff.endX - stuff.startX,
+                stuff.startY - stuff.endY);
+            drawText(c, this.text, textX, textY,
+                textAngle + this.lineAngleAdjust, selectedObject == this);
         }
     }
 
@@ -166,9 +189,12 @@ class Link {
             var dx = stuff.endX - stuff.startX;
             var dy = stuff.endY - stuff.startY;
             var length = Math.sqrt(dx * dx + dy * dy);
-            var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
-            var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
-            return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
+            var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) /
+                (length * length);
+            var distance =
+                (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+            return (percent > 0 && percent < 1 &&
+                Math.abs(distance) < hitTargetPadding);
         }
         return false;
     }
@@ -197,7 +223,8 @@ class Node {
 
     draw(c) {
         if (this.textOnly) {
-            drawText(c, this.text, this.x, this.y, null, selectedObject == this);
+            drawText(c, this.text, this.x, this.y, null,
+                selectedObject == this);
             return;
         }
 
@@ -228,7 +255,8 @@ class Node {
     }
 
     containsPoint(x, y) {
-        return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
+        return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) <
+            nodeRadius * nodeRadius;
     }
 }
 
@@ -245,22 +273,30 @@ class SelfLink {
     }
 
     setMouseStart(x, y) {
-        this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.node.y, x - this.node.x);
+        this.mouseOffsetAngle =
+            this.anchorAngle - Math.atan2(y - this.node.y, x - this.node.x);
     }
 
     setAnchorPoint(x, y) {
-        this.anchorAngle = Math.atan2(y - this.node.y, x - this.node.x) + this.mouseOffsetAngle;
+        this.anchorAngle = Math.atan2(y - this.node.y, x - this.node.x) +
+            this.mouseOffsetAngle;
         // snap to 90 degrees
         var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
-        if (Math.abs(this.anchorAngle - snap) < 0.1) this.anchorAngle = snap;
-        // keep in the range -pi to pi so our containsPoint() function always works
-        if (this.anchorAngle < -Math.PI) this.anchorAngle += 2 * Math.PI;
-        if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
+        if (Math.abs(this.anchorAngle - snap) < 0.1)
+            this.anchorAngle = snap;
+        // keep in the range -pi to pi so our containsPoint() function always
+        // works
+        if (this.anchorAngle < -Math.PI)
+            this.anchorAngle += 2 * Math.PI;
+        if (this.anchorAngle > Math.PI)
+            this.anchorAngle -= 2 * Math.PI;
     }
 
     getEndPointsAndCircle() {
-        var circleX = this.node.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
-        var circleY = this.node.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
+        var circleX =
+            this.node.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
+        var circleY =
+            this.node.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
         var circleRadius = 0.75 * nodeRadius;
         var startAngle = this.anchorAngle - Math.PI * 0.8;
         var endAngle = this.anchorAngle + Math.PI * 0.8;
@@ -286,12 +322,16 @@ class SelfLink {
         var stuff = this.getEndPointsAndCircle();
         // draw arc
         c.beginPath();
-        c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, false);
+        c.arc(stuff.circleX, stuff.circleY, stuff.circleRadius,
+            stuff.startAngle, stuff.endAngle, false);
         c.stroke();
         // draw the text on the loop farthest from the node
-        var textX = stuff.circleX + stuff.circleRadius * Math.cos(this.anchorAngle);
-        var textY = stuff.circleY + stuff.circleRadius * Math.sin(this.anchorAngle);
-        drawText(c, this.text, textX, textY, this.anchorAngle, selectedObject == this);
+        var textX =
+            stuff.circleX + stuff.circleRadius * Math.cos(this.anchorAngle);
+        var textY =
+            stuff.circleY + stuff.circleRadius * Math.sin(this.anchorAngle);
+        drawText(c, this.text, textX, textY, this.anchorAngle,
+            selectedObject == this);
         // draw the head of the arrow
         drawArrow(c, stuff.endX, stuff.endY, stuff.endAngle + Math.PI * 0.4);
     }
@@ -352,11 +392,14 @@ class StartLink {
         c.stroke();
 
         // draw the text at the end without the arrow
-        var textAngle = Math.atan2(stuff.startY - stuff.endY, stuff.startX - stuff.endX);
-        drawText(c, this.text, stuff.startX, stuff.startY, textAngle, selectedObject == this);
+        var textAngle =
+            Math.atan2(stuff.startY - stuff.endY, stuff.startX - stuff.endX);
+        drawText(c, this.text, stuff.startX, stuff.startY, textAngle,
+            selectedObject == this);
 
         // draw the head of the arrow
-        drawArrow(c, stuff.endX, stuff.endY, Math.atan2(-this.deltaY, -this.deltaX));
+        drawArrow(c, stuff.endX, stuff.endY,
+            Math.atan2(-this.deltaY, -this.deltaX));
     }
 
     containsPoint(x, y) {
@@ -364,9 +407,12 @@ class StartLink {
         var dx = stuff.endX - stuff.startX;
         var dy = stuff.endY - stuff.startY;
         var length = Math.sqrt(dx * dx + dy * dy);
-        var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
-        var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
-        return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
+        var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) /
+            (length * length);
+        var distance =
+            (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+        return (percent > 0 && percent < 1 &&
+            Math.abs(distance) < hitTargetPadding);
     }
 }
 
@@ -384,7 +430,8 @@ class TemporaryLink {
         c.stroke();
 
         // draw the head of the arrow
-        drawArrow(c, this.to.x, this.to.y, Math.atan2(this.to.y - this.from.y, this.to.x - this.from.x));
+        drawArrow(c, this.to.x, this.to.y,
+            Math.atan2(this.to.y - this.from.y, this.to.x - this.from.x));
     }
 }
 
@@ -394,7 +441,10 @@ class ExportAsLaTeX {
         this.bounds = bounds;
         this._points = [];
         this._texData = '';
-        this._scale = 0.1; // to convert pixels to document space (TikZ breaks if the numbers get too big, above 500?)
+
+        // to convert pixels to document space (TikZ breaks
+        // if the numbers get too big, above 500?)
+        this._scale = 0.1;
 
         this.toLaTeX = function () {
             return '\\documentclass[12pt]{article}\n' +
@@ -405,16 +455,13 @@ class ExportAsLaTeX {
                 '\\begin{center}\n' +
                 '\\begin{tikzpicture}[scale=0.2]\n' +
                 '\\tikzstyle{every node}+=[inner sep=0pt]\n' +
-                this._texData +
-                '\\end{tikzpicture}\n' +
+                this._texData + '\\end{tikzpicture}\n' +
                 '\\end{center}\n' +
                 '\n' +
                 '\\end{document}\n';
         };
 
-        this.beginPath = function () {
-            this._points = [];
-        };
+        this.beginPath = function () { this._points = []; };
 
         this.arc = function (x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
@@ -423,7 +470,9 @@ class ExportAsLaTeX {
             y *= this._scale;
             radius *= this._scale;
             if (endAngle - startAngle == Math.PI * 2) {
-                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
+                this._texData += '\\draw [' + this.strokeStyle + '] (' +
+                    fixed(x, 3) + ',' + fixed(-y, 3) +
+                    ') circle (' + fixed(radius, 3) + ');\n';
             } else {
                 if (isReversed) {
                     var temp = startAngle;
@@ -433,7 +482,8 @@ class ExportAsLaTeX {
                 if (endAngle < startAngle) {
                     endAngle += Math.PI * 2;
                 }
-                // TikZ needs the angles to be in between -2pi and 2pi or it breaks
+                // TikZ needs the angles to be in between -2pi and 2pi or it
+                // breaks
                 if (Math.min(startAngle, endAngle) < -2 * Math.PI) {
                     startAngle += 2 * Math.PI;
                     endAngle += 2 * Math.PI;
@@ -443,7 +493,13 @@ class ExportAsLaTeX {
                 }
                 startAngle = -startAngle;
                 endAngle = -endAngle;
-                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
+                this._texData +=
+                    '\\draw [' + this.strokeStyle + '] (' +
+                    fixed(x + radius * Math.cos(startAngle), 3) + ',' +
+                    fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' +
+                    fixed(startAngle * 180 / Math.PI, 5) + ':' +
+                    fixed(endAngle * 180 / Math.PI, 5) + ':' +
+                    fixed(radius, 3) + ');\n';
             }
         };
 
@@ -452,28 +508,29 @@ class ExportAsLaTeX {
             y -= this.bounds[1];
             x *= this._scale;
             y *= this._scale;
-            this._points.push({
-                'x': x,
-                'y': y
-            });
+            this._points.push({ 'x': x, 'y': y });
         };
 
         this.stroke = function () {
-            if (this._points.length == 0) return;
+            if (this._points.length == 0)
+                return;
             this._texData += '\\draw [' + this.strokeStyle + ']';
             for (var i = 0; i < this._points.length; i++) {
                 var p = this._points[i];
-                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) +
+                    ',' + fixed(-p.y, 2) + ')';
             }
             this._texData += ';\n';
         };
 
         this.fill = function () {
-            if (this._points.length == 0) return;
+            if (this._points.length == 0)
+                return;
             this._texData += '\\fill [' + this.strokeStyle + ']';
             for (var i = 0; i < this._points.length; i++) {
                 var p = this._points[i];
-                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) +
+                    ',' + fixed(-p.y, 2) + ')';
             }
             this._texData += ';\n';
         };
@@ -484,33 +541,43 @@ class ExportAsLaTeX {
             return c.measureText(text);
         };
 
-        this.advancedFillText = function (text, originalText, x, y, angleOrNull) {
+        this.advancedFillText = function (text, originalText, x, y,
+            angleOrNull) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             if (text.replace(' ', '').length > 0) {
                 var nodeParams = '';
-                // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
+                // x and y start off as the center of the text, but will be
+                // moved to one side of the box when angleOrNull != null
                 if (angleOrNull != null) {
                     var width = this.measureText(text).width;
                     var dx = Math.cos(angleOrNull);
                     var dy = Math.sin(angleOrNull);
                     if (Math.abs(dx) > Math.abs(dy)) {
-                        if (dx > 0) nodeParams = '[right] ', x -= width / 2;
-                        else nodeParams = '[left] ', x += width / 2;
+                        if (dx > 0)
+                            nodeParams = '[right] ', x -= width / 2;
+                        else
+                            nodeParams = '[left] ', x += width / 2;
                     } else {
-                        if (dy > 0) nodeParams = '[below] ', y -= 10;
-                        else nodeParams = '[above] ', y += 10;
+                        if (dy > 0)
+                            nodeParams = '[below] ', y -= 10;
+                        else
+                            nodeParams = '[above] ', y += 10;
                     }
                 }
                 x *= this._scale;
                 y *= this._scale;
                 var escapedBraces = originalText.replace(/{/g, "\\{");
                 escapedBraces = escapedBraces.replace(/}/g, "\\}");
-                this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + escapedBraces.replace(/ /g, '\\mbox{ }') + '$};\n';
+                this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) +
+                    ') node ' + nodeParams + '{$' +
+                    escapedBraces.replace(/ /g, '\\mbox{ }') +
+                    '$};\n';
             }
         };
 
-        this.translate = this.save = this.restore = this.clearRect = function () { };
+        this.translate = this.save = this.restore =
+            this.clearRect = function () { };
     }
 }
 
@@ -531,26 +598,30 @@ class ExportAsSVG {
 
         this.toSVG = function () {
             var data = '<?xml version="1.0" standalone="no"?>\n';
-            data += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n';
-            data += '<svg width="' + this.width + '" height="' + this.height + '" version="1.1" xmlns="http://www.w3.org/2000/svg">\n';
+            data +=
+                '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n';
+            data += '<svg width="' + this.width + '" height="' + this.height +
+                '" version="1.1" xmlns="http://www.w3.org/2000/svg">\n';
             data += this._svgData;
             data += '</svg>\n';
             return data;
         };
 
-        this.beginPath = function () {
-            this._points = [];
-        };
+        this.beginPath = function () { this._points = []; };
 
         this.arc = function (x, y, radius, startAngle, endAngle, isReversed) {
             x -= this.bounds[0];
             y -= this.bounds[1];
             x += this._transX;
             y += this._transY;
-            var style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
+            var style = 'stroke="' + this.strokeStyle + '" stroke-width="' +
+                this.lineWidth + '" fill="none"';
 
             if (endAngle - startAngle == Math.PI * 2) {
-                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
+                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) +
+                    '" cy="' + fixed(y, 3) + '" rx="' +
+                    fixed(radius, 3) + '" ry="' +
+                    fixed(radius, 3) + '"/>\n';
             } else {
                 if (isReversed) {
                     var temp = startAngle;
@@ -566,16 +637,23 @@ class ExportAsSVG {
                 var startY = y + radius * Math.sin(startAngle);
                 var endX = x + radius * Math.cos(endAngle);
                 var endY = y + radius * Math.sin(endAngle);
-                var useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
+                var useGreaterThan180 =
+                    (Math.abs(endAngle - startAngle) > Math.PI);
                 var goInPositiveDirection = 1;
 
                 this._svgData += '\t<path ' + style + ' d="';
-                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
-                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
-                this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
+                this._svgData += 'M ' + fixed(startX, 3) + ',' +
+                    fixed(startY, 3) +
+                    ' '; // startPoint(startX, startY)
+                this._svgData += 'A ' + fixed(radius, 3) + ',' +
+                    fixed(radius, 3) +
+                    ' ';  // radii(radius, radius)
+                this._svgData += '0 '; // value of 0 means perfect circle,
+                // others mean ellipse
                 this._svgData += +useGreaterThan180 + ' ';
                 this._svgData += +goInPositiveDirection + ' ';
-                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
+                this._svgData += fixed(endX, 3) + ',' +
+                    fixed(endY, 3); // endPoint(endX, endY)
                 this._svgData += '"/>\n';
             }
         };
@@ -585,26 +663,31 @@ class ExportAsSVG {
             y -= this.bounds[1];
             x += this._transX;
             y += this._transY;
-            this._points.push({
-                'x': x,
-                'y': y
-            });
+            this._points.push({ 'x': x, 'y': y });
         };
 
         this.stroke = function () {
-            if (this._points.length == 0) return;
-            this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            if (this._points.length == 0)
+                return;
+            this._svgData += '\t<polygon stroke="' + this.strokeStyle +
+                '" stroke-width="' + this.lineWidth + '" points="';
             for (var i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') +
+                    fixed(this._points[i].x, 3) + ',' +
+                    fixed(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         };
 
         this.fill = function () {
-            if (this._points.length == 0) return;
-            this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            if (this._points.length == 0)
+                return;
+            this._svgData += '\t<polygon fill="' + this.fillStyle +
+                '" stroke-width="' + this.lineWidth + '" points="';
             for (var i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') +
+                    fixed(this._points[i].x, 3) + ',' +
+                    fixed(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         };
@@ -621,7 +704,10 @@ class ExportAsSVG {
             x += this._transX;
             y += this._transY;
             if (text.replace(' ', '').length > 0) {
-                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Segoe UI" font-size="20">' + textToXML(text) + '</text>\n';
+                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' +
+                    fixed(y, 3) +
+                    '" font-family="Segoe UI" font-size="20">' +
+                    textToXML(text) + '</text>\n';
             }
         };
 
@@ -635,15 +721,16 @@ class ExportAsSVG {
 }
 
 const greekLetterNames = [
-    'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
-    'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi',
-    'Omega', 'emptyset', 'rightarrow', 'leftarrow'
+    'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta',
+    'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi',
+    'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi',
+    'Chi', 'Psi', 'Omega', 'emptyset', 'rightarrow', 'leftarrow'
 ];
 
 const specialSymbols = {
-    emptyset: String.fromCharCode(8709), // ∅
+    emptyset: String.fromCharCode(8709),   // ∅
     rightarrow: String.fromCharCode(8594), // →
-    leftarrow: String.fromCharCode(8592) // ←
+    leftarrow: String.fromCharCode(8592)   // ←
 };
 
 function convertLatexShortcuts(text) {
@@ -653,7 +740,9 @@ function convertLatexShortcuts(text) {
             text = text.replace(regex, specialSymbols[name]);
         } else {
             // Handle uppercase Greek letters
-            const upperCharCode = 913 + index + (index > 16 ? 1 : 0); // Unicode skips one character after Rho
+            const upperCharCode =
+                913 + index +
+                (index > 16 ? 1 : 0); // Unicode skips one character after Rho
             const upperRegex = new RegExp(`\\\\${name}`, 'g');
             text = text.replace(upperRegex, String.fromCharCode(upperCharCode));
 
@@ -674,7 +763,8 @@ function convertLatexShortcuts(text) {
 }
 
 function textToXML(text) {
-    text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    text =
+        text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     var result = '';
     for (var i = 0; i < text.length; i++) {
         var c = text.charCodeAt(i);
@@ -715,7 +805,8 @@ function drawText(c, originalText, x, y, angleOrNull, isSelected) {
         var sin = Math.sin(angleOrNull);
         var cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
         var cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
-        var slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
+        var slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX -
+            cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
         x += cornerPointX - sin * slide;
         y += cornerPointY + cos * slide;
     }
@@ -727,7 +818,8 @@ function drawText(c, originalText, x, y, angleOrNull, isSelected) {
         x = Math.round(x);
         y = Math.round(y);
         c.fillText(text, x, y + 6);
-        if (isSelected && caretVisible && canvasHasFocus() && document.hasFocus()) {
+        if (isSelected && caretVisible && canvasHasFocus() &&
+            document.hasFocus()) {
             x += width;
             c.beginPath();
             c.moveTo(x, y - 10);
@@ -752,10 +844,10 @@ var nodes = [];
 var links = [];
 
 var cursorVisible = true;
-var snapToPadding = 6; // pixels
-var hitTargetPadding = 6; // pixels
+var snapToPadding = 6;     // pixels
+var hitTargetPadding = 6;  // pixels
 var selectedObject = null; // either a Link or a Node
-var currentLink = null; // a Link
+var currentLink = null;    // a Link
 var movingObject = false;
 var originalClick;
 
@@ -790,13 +882,15 @@ function drawUsing(c) {
 
     for (var i = 0; i < nodes.length; i++) {
         c.lineWidth = 1;
-        c.fillStyle = c.strokeStyle = (nodes[i] == selectedObject) ? 'blue' : 'black';
+        c.fillStyle = c.strokeStyle =
+            (nodes[i] == selectedObject) ? 'blue' : 'black';
         nodes[i].draw(c);
     }
 
     for (var i = 0; i < links.length; i++) {
         c.lineWidth = 1;
-        c.fillStyle = c.strokeStyle = (links[i] == selectedObject) ? 'blue' : 'black';
+        c.fillStyle = c.strokeStyle =
+            (links[i] == selectedObject) ? 'blue' : 'black';
         links[i].draw(c);
     }
 
@@ -831,7 +925,8 @@ function selectObject(x, y) {
 
 function snapNode(node) {
     for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i] == node) continue;
+        if (nodes[i] == node)
+            continue;
 
         if (Math.abs(node.x - nodes[i].x) < snapToPadding) {
             node.x = nodes[i].x;
@@ -843,109 +938,113 @@ function snapNode(node) {
     }
 }
 
-window.onload = function () {
-    canvas = document.getElementById('canvas');
-    restoreBackup();
-    draw();
-
-    canvas.onmousedown = function (e) {
-        var mouse = crossBrowserRelativeMousePos(e);
-        selectedObject = selectObject(mouse.x, mouse.y);
-        movingObject = false;
-        originalClick = mouse;
-
-        if (selectedObject != null) {
-            if (shift && selectedObject instanceof Node) {
-                currentLink = new SelfLink(selectedObject, mouse);
-            } else {
-                movingObject = true;
-                deltaMouseX = deltaMouseY = 0;
-                if (selectedObject.setMouseStart) {
-                    selectedObject.setMouseStart(mouse.x, mouse.y);
-                }
-            }
-            resetCaret();
-        } else if (shift) {
-            currentLink = new TemporaryLink(mouse, mouse);
-        }
-
+window.onload =
+    function () {
+        canvas = document.getElementById('canvas');
+        restoreBackup();
         draw();
 
-        if (canvasHasFocus()) {
-            // disable drag-and-drop only if the canvas is already focused
-            return false;
-        } else {
-            // otherwise, let the browser switch the focus away from wherever it was
-            resetCaret();
-            return true;
-        }
-    };
+        canvas.onmousedown = function (e) {
+            var mouse = crossBrowserRelativeMousePos(e);
+            selectedObject = selectObject(mouse.x, mouse.y);
+            movingObject = false;
+            originalClick = mouse;
 
-    canvas.ondblclick = function (e) {
-        var mouse = crossBrowserRelativeMousePos(e);
-        selectedObject = selectObject(mouse.x, mouse.y);
-
-        if (selectedObject == null) {
-            selectedObject = new Node(mouse.x, mouse.y);
-            nodes.push(selectedObject);
-            resetCaret();
-            draw();
-        } else if (selectedObject instanceof Node) {
-            selectedObject.isAcceptState = !selectedObject.isAcceptState;
-            draw();
-        }
-    };
-
-    canvas.onmousemove = function (e) {
-        var mouse = crossBrowserRelativeMousePos(e);
-
-        if (currentLink != null) {
-            var targetNode = selectObject(mouse.x, mouse.y);
-            if (!(targetNode instanceof Node)) {
-                targetNode = null;
+            if (selectedObject != null) {
+                if (shift && selectedObject instanceof Node) {
+                    currentLink = new SelfLink(selectedObject, mouse);
+                } else {
+                    movingObject = true;
+                    deltaMouseX = deltaMouseY = 0;
+                    if (selectedObject.setMouseStart) {
+                        selectedObject.setMouseStart(mouse.x, mouse.y);
+                    }
+                }
+                resetCaret();
+            } else if (shift) {
+                currentLink = new TemporaryLink(mouse, mouse);
             }
+
+            draw();
+
+            if (canvasHasFocus()) {
+                // disable drag-and-drop only if the canvas is already focused
+                return false;
+            } else {
+                // otherwise, let the browser switch the focus away from wherever it
+                // was
+                resetCaret();
+                return true;
+            }
+        };
+
+        canvas.ondblclick = function (e) {
+            var mouse = crossBrowserRelativeMousePos(e);
+            selectedObject = selectObject(mouse.x, mouse.y);
 
             if (selectedObject == null) {
-                if (targetNode != null) {
-                    currentLink = new StartLink(targetNode, originalClick);
-                } else {
-                    currentLink = new TemporaryLink(originalClick, mouse);
-                }
-            } else {
-                if (targetNode == selectedObject) {
-                    currentLink = new SelfLink(selectedObject, mouse);
-                } else if (targetNode != null) {
-                    currentLink = new Link(selectedObject, targetNode);
-                } else {
-                    currentLink = new TemporaryLink(selectedObject.closestPointOnCircle(mouse.x, mouse.y), mouse);
-                }
-            }
-            draw();
-        }
-
-        if (movingObject) {
-            selectedObject.setAnchorPoint(mouse.x, mouse.y);
-            if (selectedObject instanceof Node) {
-                snapNode(selectedObject);
-            }
-            draw();
-        }
-    };
-
-    canvas.onmouseup = function (e) {
-        movingObject = false;
-
-        if (currentLink != null) {
-            if (!(currentLink instanceof TemporaryLink)) {
-                selectedObject = currentLink;
-                links.push(currentLink);
+                selectedObject = new Node(mouse.x, mouse.y);
+                nodes.push(selectedObject);
                 resetCaret();
+                draw();
+            } else if (selectedObject instanceof Node) {
+                selectedObject.isAcceptState = !selectedObject.isAcceptState;
+                draw();
             }
-            currentLink = null;
-            draw();
-        }
-    };
-}
+        };
+
+        canvas.onmousemove = function (e) {
+            var mouse = crossBrowserRelativeMousePos(e);
+
+            if (currentLink != null) {
+                var targetNode = selectObject(mouse.x, mouse.y);
+                if (!(targetNode instanceof Node)) {
+                    targetNode = null;
+                }
+
+                if (selectedObject == null) {
+                    if (targetNode != null) {
+                        currentLink = new StartLink(targetNode, originalClick);
+                    } else {
+                        currentLink = new TemporaryLink(originalClick, mouse);
+                    }
+                } else {
+                    if (targetNode == selectedObject) {
+                        currentLink = new SelfLink(selectedObject, mouse);
+                    } else if (targetNode != null) {
+                        currentLink = new Link(selectedObject, targetNode);
+                    } else {
+                        currentLink = new TemporaryLink(
+                            selectedObject.closestPointOnCircle(mouse.x, mouse.y),
+                            mouse);
+                    }
+                }
+                draw();
+            }
+
+            if (movingObject) {
+                selectedObject.setAnchorPoint(mouse.x, mouse.y);
+                if (selectedObject instanceof Node) {
+                    snapNode(selectedObject);
+                }
+                draw();
+            }
+        };
+
+        canvas.onmouseup = function (e) {
+            movingObject = false;
+
+            if (currentLink != null) {
+                if (!(currentLink instanceof TemporaryLink)) {
+                    selectedObject = currentLink;
+                    links.push(currentLink);
+                    resetCaret();
+                }
+                currentLink = null;
+                draw();
+            }
+        };
+    }
 
 var shift = false;
 
@@ -959,12 +1058,14 @@ document.onkeydown = function (e) {
         return true;
     } else if (key == 8) { // backspace key
         if (selectedObject != null && 'text' in selectedObject) {
-            selectedObject.text = selectedObject.text.substr(0, selectedObject.text.length - 1);
+            selectedObject.text =
+                selectedObject.text.substr(0, selectedObject.text.length - 1);
             resetCaret();
             draw();
         }
 
-        // backspace is a shortcut for the back button, but do NOT want to change pages
+        // backspace is a shortcut for the back button, but do NOT want to
+        // change pages
         return false;
     } else if (key == 46) { // delete key
         if (selectedObject != null) {
@@ -974,7 +1075,10 @@ document.onkeydown = function (e) {
                 }
             }
             for (var i = 0; i < links.length; i++) {
-                if (links[i] == selectedObject || links[i].node == selectedObject || links[i].nodeA == selectedObject || links[i].nodeB == selectedObject) {
+                if (links[i] == selectedObject ||
+                    links[i].node == selectedObject ||
+                    links[i].nodeA == selectedObject ||
+                    links[i].nodeB == selectedObject) {
                     links.splice(i--, 1);
                 }
             }
@@ -998,7 +1102,9 @@ document.onkeypress = function (e) {
     if (!canvasHasFocus()) {
         // don't read keystrokes when other things have focus
         return true;
-    } else if (key >= 0x20 && key <= 0x7E && !e.metaKey && !e.altKey && !e.ctrlKey && selectedObject != null && 'text' in selectedObject) {
+    } else if (key >= 0x20 && key <= 0x7E && !e.metaKey && !e.altKey &&
+        !e.ctrlKey && selectedObject != null &&
+        'text' in selectedObject) {
         selectedObject.text += String.fromCharCode(key);
         resetCaret();
         draw();
@@ -1006,7 +1112,8 @@ document.onkeypress = function (e) {
         // don't let keys do their actions (like space scrolls down the page)
         return false;
     } else if (key == 8) {
-        // backspace is a shortcut for the back button, but do NOT want to change pages
+        // backspace is a shortcut for the back button, but do NOT want to
+        // change pages
         return false;
     }
 };
@@ -1019,34 +1126,29 @@ function crossBrowserKey(e) {
 function crossBrowserElementPos(e) {
     e = e || window.event;
     var obj = e.target || e.srcElement;
-    var x = 0,
-        y = 0;
+    var x = 0, y = 0;
     while (obj.offsetParent) {
         x += obj.offsetLeft;
         y += obj.offsetTop;
         obj = obj.offsetParent;
     }
-    return {
-        'x': x,
-        'y': y
-    };
+    return { 'x': x, 'y': y };
 }
 
 function crossBrowserMousePos(e) {
     e = e || window.event;
     return {
-        'x': e.pageX || e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
-        'y': e.pageY || e.clientY + document.body.scrollTop + document.documentElement.scrollTop,
+        'x': e.pageX || e.clientX + document.body.scrollLeft +
+            document.documentElement.scrollLeft,
+        'y': e.pageY || e.clientY + document.body.scrollTop +
+            document.documentElement.scrollTop,
     };
 }
 
 function crossBrowserRelativeMousePos(e) {
     var element = crossBrowserElementPos(e);
     var mouse = crossBrowserMousePos(e);
-    return {
-        'x': mouse.x - element.x,
-        'y': mouse.y - element.y
-    };
+    return { 'x': mouse.x - element.x, 'y': mouse.y - element.y };
 }
 
 function output(text) {
@@ -1065,7 +1167,8 @@ function saveAsPNG() {
     var bounds = getBoundingRect();
     var croppedWidth = bounds[2] - bounds[0];
     var croppedHeight = bounds[3] - bounds[1];
-    var croppedData = canvas.getContext('2d').getImageData(bounds[0], bounds[1], croppedWidth, croppedHeight);
+    var croppedData = canvas.getContext('2d').getImageData(
+        bounds[0], bounds[1], croppedWidth, croppedHeight);
     // Finally, create a temporary canvas to generate PNG data.
     var tmp = document.createElement("canvas");
     tmp.width = croppedWidth;
@@ -1074,7 +1177,8 @@ function saveAsPNG() {
     var pngData = canvas.toDataURL('image/png');
     var pngLink = document.getElementById("pngLink");
     pngLink.download = "image.png";
-    pngLink.href = pngData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    pngLink.href =
+        pngData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 // Returns a bounding rectangle that contains all non-empty pixels. Returns an
@@ -1125,10 +1229,14 @@ function getBoundingRect() {
     minY -= padding;
     maxX += padding;
     maxY += padding;
-    if (minX < 0) minX = 0;
-    if (minY < 0) minY = 0;
-    if (maxX > canvas.width) maxX = canvas.width;
-    if (maxY > canvas.width) maxY = canvas.width;
+    if (minX < 0)
+        minX = 0;
+    if (minY < 0)
+        minY = 0;
+    if (maxX > canvas.width)
+        maxX = canvas.width;
+    if (maxY > canvas.width)
+        maxY = canvas.width;
     return [minX, minY, maxX, maxY];
 }
 
@@ -1175,7 +1283,8 @@ function saveAsJSON() {
 
 function jsonUploaded() {
     var uploadElement = document.getElementById("jsonUpload");
-    if (uploadElement.files.length < 1) return;
+    if (uploadElement.files.length < 1)
+        return;
     var file = uploadElement.files[0];
     var reader = new FileReader();
     reader.onload = function (e) {
@@ -1197,14 +1306,18 @@ function uploadJSON() {
 }
 
 function det(a, b, c, d, e, f, g, h, i) {
-    return a * e * i + b * f * g + c * d * h - a * f * h - b * d * i - c * e * g;
+    return a * e * i + b * f * g + c * d * h - a * f * h - b * d * i -
+        c * e * g;
 }
 
 function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
     var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
-    var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
-    var by = det(x1 * x1 + y1 * y1, x1, 1, x2 * x2 + y2 * y2, x2, 1, x3 * x3 + y3 * y3, x3, 1);
-    var c = -det(x1 * x1 + y1 * y1, x1, y1, x2 * x2 + y2 * y2, x2, y2, x3 * x3 + y3 * y3, x3, y3);
+    var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1,
+        x3 * x3 + y3 * y3, y3, 1);
+    var by = det(x1 * x1 + y1 * y1, x1, 1, x2 * x2 + y2 * y2, x2, 1,
+        x3 * x3 + y3 * y3, x3, 1);
+    var c = -det(x1 * x1 + y1 * y1, x1, y1, x2 * x2 + y2 * y2, x2, y2,
+        x3 * x3 + y3 * y3, x3, y3);
     return {
         'x': -bx / (2 * a),
         'y': -by / (2 * a),
